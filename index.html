@@ -2,136 +2,63 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Happy Birthday Riya 🎂❤️</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, touch-action=none">
+  <title>Birthday Surprise for Riya 🎉</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <style>
-    @keyframes float {
-      0% { transform: translateY(0px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
-    }
-    @keyframes scan {
-      0% { top: 0%; }
-      50% { top: 100%; }
-      100% { top: 0%; }
-    }
-    @keyframes fall {
-      0% { transform: translateY(-50px); opacity: 1; }
-      100% { transform: translateY(100vh); opacity: 0; }
-    }
+    @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(-100vh); opacity: 0; } }
+    @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
     body {
-      background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 50%, #f7accf 100%);
-      font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+      font-family: system-ui, -apple-system, sans-serif;
       touch-action: manipulation;
-      overflow-x: hidden;
+      overflow: hidden; /* Fixes "fit to screen" and prevents user scrolling */
     }
-    .bg-heart {
-      position: absolute;
-      color: rgba(255, 255, 255, 0.3);
-      animation: float 10s linear infinite;
-      pointer-events: none;
+    #root {
+      width: 100vw; height: 100vh; overflow-y: auto; overflow-x: hidden;
+      display: flex; items-center justify-center; p-4;
     }
-    .scan-line {
-      position: absolute;
-      width: 100%;
-      height: 4px;
-      background: #ff3366;
-      box-shadow: 0 0 15px #ff3366, 0 0 30px #ff3366;
-      animation: scan 2s infinite ease-in-out;
-    }
-    .falling-item {
-      position: fixed;
-      top: -50px;
-      z-index: 50;
-      pointer-events: none;
-      animation: fall 3s linear forwards;
-    }
+    .fp-scanner { position: relative; width: 120px; height: 120px; border: 4px solid #ff3366; border-radius: 50%; overflow: hidden; }
+    .fp-image { width: 100%; height: 100%; object-fit: cover; }
+    .scan-line { position: absolute; width: 100%; height: 6px; background: red; top: 0; animation: scan 2s linear infinite; box-shadow: 0 0 10px red; }
+    .floating-balloon { position: fixed; bottom: -50px; font-size: 2.5rem; animation: float 10s linear infinite; pointer-events: none; }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 relative">
+<body class="min-h-screen">
 
-  <div id="bgHearts"></div>
-
-  <div id="card" class="bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-2xl text-center border border-pink-200 w-full max-w-md z-10 my-4"></div>
+  <div id="root">
+    <div id="card" class="bg-white p-6 rounded-3xl shadow-xl text-center border border-pink-100 w-full max-w-md my-auto"></div>
+  </div>
 
   <script>
-    // Background Hearts Creation
-    const bgContainer = document.getElementById('bgHearts');
-    for (let i = 0; i < 15; i++) {
-      const heart = document.createElement('div');
-      heart.className = 'bg-heart';
-      heart.innerHTML = ['❤️', '💖', '✨', '💕'][Math.floor(Math.random() * 4)];
-      heart.style.left = Math.random() * 100 + 'vw';
-      heart.style.top = Math.random() * 100 + 'vh';
-      heart.style.fontSize = (Math.random() * 20 + 15) + 'px';
-      heart.style.animationDuration = (Math.random() * 5 + 5) + 's';
-      bgContainer.appendChild(heart);
-    }
+    // Step 2: Initialize EmailJS with your User ID (Get from EmailJS dashboard)
+    // emailjs.init("YOUR_EMAILJS_USER_ID");
 
-    let step = 1; // Step 1 starts with COUNTDOWN
+    let step = 1;
     let holdProgress = 0;
     let holdInterval = null;
-
     let photos = [
-      { src: 'photo1.jpg', caption: 'Sweet Memory 💗' },
-      { src: 'photo2.jpg', caption: 'Sweet Memory 💗' },
-      { src: 'photo3.jpg', caption: 'Sweet Memory 💗' },
-      { src: 'photo4.jpg', caption: 'Sweet Memory 💗' },
-      { src: 'photo5.jpg', caption: 'Sweet Memory 💗' },
-      { src: 'photo6.jpg', caption: 'Sweet Memory 💗' }
+      { src: 'images/photo1.jpg', caption: 'Sweet Memory 💗' },
+      { src: 'images/photo2.jpg', caption: 'Sweet Memory 💗' },
+      { src: 'images/photo3.jpg', caption: 'Sweet Memory 💗' },
+      { src: 'images/photo4.jpg', caption: 'Sweet Memory 💗' },
+      { src: 'images/photo5.jpg', caption: 'Sweet Memory 💗' },
+      { src: 'images/photo6.jpg', caption: 'Sweet Memory 💗' }
     ];
     let activePhotoIdx = 0;
 
     const relQuestions = [
-      {
-        q: '😌 Main jiddan da haan, tenu oh genuine lagda ya thoda zyada hi pagal?',
-        options: [
-          { text: 'Genuine ❤️', react: 'Aww! Tusi vi bhot pyare ho! 🥺❤️' },
-          { text: 'Cute pagal 😂', react: 'Haha! Pagal taan haan par sirf tere layi! 🤪' },
-          { text: 'Dono da mixture 😌', react: 'Best combination lagda fer taan! ✨' }
-        ]
-      },
-      {
-        q: '🫢 Meri kehdi gall ya aadat tenu kade-kade awkward ya annoying lagdi aa?',
-        options: [
-          { text: 'Baar-baar puchhna "ki hoya?" 😭', react: 'Care karda haan islayi puchhda haan! 🥺' },
-          { text: 'Thodi zyada care karna 😂', react: 'Care thodi zyada hi honi chahidi aa! 🥰' },
-          { text: 'Meri overthinking 😌', react: 'Aage ton ghata devanga overthinking! 🧠' },
-          { text: 'Kujh hor… 👀', react: 'Mainu dssna zaroor fer baad vich! 😂' }
-        ]
-      },
-      {
-        q: '🥹 Je by chance main tere naal gall karni band kar dawaan, ya sade vich koi misunderstanding ho jaave… tu aap mere naal gall karan di try karegi?',
-        options: [
-          { text: 'Haan ji, zaroor ❤️', react: 'Eh sun ke dil nu sukoon mileya! ❤️' },
-          { text: 'Pehla gussa karungi, fer aap gall karangi 😂', react: 'Thoda gussa vi zaroori aa! 😜' },
-          { text: 'Situation te depend karega 😌', react: 'Fair enough! Par gall kar leya karo! 🥹' },
-          { text: 'Apna answer likhungi ✍️', react: 'Aapda answer likh ke batao fer! 📝' }
-        ]
-      },
-      {
-        q: '🫶 Meri care ya meri gallan vichon kehdi cheez tenu sab ton zyada feel hundi aa ki "haan, eh banda genuinely care karda"?',
-        options: [
-          { text: 'Baar-baar tera haal puchhna ❤️', react: 'Tuhadi health/mood sab ton pehla! 🫶' },
-          { text: 'Tere chhote-chhote details yaad rakhna 🥹', react: 'Har choti gall yaad rehndi aa mainu! ✨' },
-          { text: 'Tere dreams te future nu seriously lena 💗', react: 'Tuhade supne mere supne han! 🌈' },
-          { text: 'Apna answer likhungi ✍️', react: 'Kujh khas hi hona fer taan! ❤️' }
-        ]
-      },
-      {
-        q: '💗 Last question: main jiddan da haan, ohnu change karna chaundi aa ya eda hi theek aa?',
-        options: [
-          { text: 'Eda hi ❤️', react: 'Bestest! Main vi eda hi rahunga! ❤️' },
-          { text: 'Thoda jeha change 😂', react: 'Chalo thoda adjust kar lavange! 😉' },
-          { text: 'Bilkul change nahi 🥹', react: 'Thank you for accepting me as I am! 💖' },
-          { text: 'Mainu sochan de 😌', react: 'Time lao, soch ke dasso! ⏱️' }
-        ]
-      }
+      { q: '😌 Main jiddan da haan, tenu oh genuine lagda ya thoda zyada hi pagal?', options: [{ text: 'Genuine ❤️', react: 'Aww! Tusi vi bhot pyare ho! 🥺❤️' }, { text: 'Cute pagal 😂', react: 'Haha! Pagal taan haan par sirf tere layi! 🤪' }, { text: 'Dono da mixture 😌', react: 'Best combination lagda fer taan! ✨' }] },
+      { q: '🫢 Meri kehdi gall ya aadat tenu kade-kade awkward ya annoying lagdi aa?', options: [{ text: 'Baar-baar puchhna "ki hoya?" 😭', react: 'Care karda haan islayi puchhda haan! 🥺' }, { text: 'Thodi zyada care karna 😂', react: 'Care thodi zyada hi honi chahidi aa! 🥰' }, { text: 'Meri overthinking 😌', react: 'Aage ton ghata devanga overthinking! 🧠' }, { text: 'Kujh hor… 👀', react: 'Mainu dssna zaroor fer baad vich! 😂' }] },
+      { q: '🥹 Je by chance main tere naal gall karni band kar dawaan, ya sade vich koi misunderstanding ho jaave… tu aap mere naal gall karan di try karegi?', options: [{ text: 'Haan ji, zaroor ❤️', react: 'Eh sun ke dil nu sukoon mileya! ❤️' }, { text: 'Pehla gussa karungi, fer aap gall karangi 😂', react: 'Thoda gussa vi zaroori aa! 😜' }, { text: 'Situation te depend karega 😌', react: 'Fair enough! Par gall kar leya karo! 🥹' }, { text: 'Apna answer likhungi ✍️', react: 'Aapda answer likh ke batao fer! 📝' }] },
+      { q: '🫶 Meri care ya meri gallan vichon kehdi cheez tenu sab ton zyada feel hundi aa ki "haan, eh banda genuinely care karda"?', options: [{ text: 'Baar-baar tera haal puchhna ❤️', react: 'Tuhadi health/mood sab ton pehla! 🫶' }, { text: 'Tere chhote-chhote details yaad rakhna 🥹', react: 'Har choti gall yaad rehndi aa mainu! ✨' }, { text: 'Tere dreams te future nu seriously lena 💗', react: 'Tuhade supne mere supne han! 🌈' }, { text: 'Apna answer likhungi ✍️', react: 'Kujh khas hi hona fer taan! ❤️' }] },
+      { q: '💗 Last question: main jiddan da haan, ohnu change karna chaundi aa ya eda hi theek aa?', options: [{ text: 'Eda hi ❤️', react: 'Bestest! Main vi eda hi rahunga! ❤️' }, { text: 'Thoda jeha change 😂', react: 'Chalo thoda adjust kar lavange! 😉' }, { text: 'Bilkul change nahi 🥹', react: 'Thank you for accepting me as I am! 💖' }, { text: 'Mainu sochan de 😌', react: 'Time lao, soch ke dasso! ⏱️' }] }
     ];
 
     let relIndex = 0;
-    let relReaction = '';
+    let relAnswers = [];
 
     const comQuestions = [
       { q: '😊 Apni sohni smile hamesha maintain rakhegi?', options: ['Haan ji, hamesha ❤️', 'Koshish poori rahugi 🥰', 'Reason tusi dinde rehna 😌'] },
@@ -143,321 +70,185 @@
 
     let comIndex = 0;
     let comAnswers = [];
-    let cakeClicks = 0;
+    let canvasRef = { current: null };
     let isDrawing = false;
     let hasSigned = false;
+    let cakeClicks = 0;
 
     function render() {
       const card = document.getElementById('card');
 
-      // STEP 1: COUNTDOWN AT START
       if (step === 1) {
         card.innerHTML = `
-          <div class="text-5xl mb-2">⏳✨</div>
-          <h2 class="text-xl font-bold text-pink-600 mb-4">Riya da Birthday Countdown 🎂❤️</h2>
-          <div id="timerDisplay" class="grid grid-cols-4 gap-2 text-center font-bold text-gray-700 mb-6"></div>
-          <button onclick="setStep(2)" class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition w-full">Start Surprise 🎁✨</button>
-        `;
-        updateTimer();
-      } 
-      // STEP 2: OPENING MONKEY
-      else if (step === 2) {
-        card.innerHTML = `
-          <div class="text-6xl mb-3 animate-bounce">🐒✉️</div>
+          <div class="text-6xl mb-3">🐒✉️</div>
           <h2 class="text-2xl font-bold text-pink-600 mb-2">A Special Wish For Riya ✨</h2>
           <p class="text-gray-600 mb-6">Tuhade layi ek chhota jeha pyara surprise!</p>
-          <button onclick="setStep(3)" class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition">Open Letter 💌</button>
+          <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold active:scale-95 transition" onClick="setStep(2)">Open Letter 💌</button>
         `;
-      } 
-      // STEP 3: READY SCREEN
-      else if (step === 4) {
+      } else if (step === 2) {
         card.innerHTML = `
           <h2 class="text-2xl font-bold text-pink-600 mb-6">Are You Ready For The Surprise? 💗</h2>
-          <button onclick="setStep(5)" class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition">Yes, I am Ready! ✨</button>
+          <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold active:scale-95 transition" onClick="setStep(3)">Yes, I am Ready! ✨</button>
         `;
-      } 
-      // STEP 4: REAL BIOMETRIC FINGERPRINT
-      else if (step === 3) {
+      } else if (step === 3) {
         card.innerHTML = `
           <h2 class="text-xl font-bold text-gray-800 mb-2">🔐 Biometric Verification</h2>
-          <p class="text-xs text-gray-500 mb-6">Press & Hold your finger on the scanner for 2 seconds!</p>
-          
-          <div id="fpBox" class="relative w-28 h-36 mx-auto mb-6 bg-pink-50 rounded-2xl border-2 border-pink-400 flex items-center justify-center overflow-hidden cursor-pointer shadow-inner">
-            <div id="scanLine" class="scan-line hidden"></div>
-            <svg class="w-16 h-20 text-pink-500 opacity-80" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 1C8.14 1 5 4.14 5 8v1h2V8c0-2.76 2.24-5 5-5s5 2.24 5 5v1h2V8c0-3.86-3.14-7-7-7zm-4 8c-2.21 0-4 1.79-4 4v3h2v-3c0-1.1.9-2 2-2s2 .9 2 2v3h2v-3c0-2.21-1.79-4-4-4zm8 0c-.55 0-1 .45-1 1v6c0 1.66-1.34 3-3 3s-3-1.34-3-3v-2H7v2c0 2.76 2.24 5 5 5s5-2.24 5-5v-6c0-.55-.45-1-1-1z"/>
-            </svg>
+          <p class="text-sm text-gray-500 mb-4">Click and hold the fingerprint scanner!</p>
+          <div class="fp-scanner mx-auto mb-4" onMouseDown="startHold()" onMouseUp="endHold()" onTouchStart="startHold()" onTouchEnd="endHold()">
+            <img src="https://static.thenounproject.com/png/3474320-200.png" alt="Fingerprint" class="fp-image"> <div class="scan-line"></div>
           </div>
-
           <div class="w-full bg-gray-200 h-3 rounded-full overflow-hidden mb-2">
-            <div id="fpBar" class="bg-pink-500 h-full transition-all duration-100" style="width: ${holdProgress}%"></div>
+            <div class="bg-pink-500 h-full transition-all duration-100" style="width: ${holdProgress}%"></div>
           </div>
-          <p id="fpText" class="text-sm font-bold text-pink-500">${holdProgress}%</p>
+          <p class="text-sm font-bold text-pink-500">${holdProgress}% (Keep holding...)</p>
         `;
-        setTimeout(attachFP, 50);
-      } 
-      // STEP 5: HAPPY BIRTHDAY
-      else if (step === 5) {
+      } else if (step === 4) {
         card.innerHTML = `
           <h1 class="text-3xl font-extrabold text-pink-600 mb-6">🎉 Happy Birthday Riya ❤️ 🎂</h1>
-          <button onclick="setStep(6)" class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition">Next ✨</button>
+          <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold active:scale-95 transition" onClick="setStep(5)">Next ✨</button>
         `;
-      } 
-      // STEP 6: FIRST WISH
-      else if (step === 6) {
+      } else if (step === 5) {
         card.innerHTML = `
           <div class="text-5xl mb-4">💌</div>
-          <p class="text-gray-700 leading-relaxed text-base mb-6">
-            "Rabb kare tuhada eh saal khushiyan, achhi health te kamyabi naal bharya rahe. Hamesha eda hi smile karde raho! ✨❤️"
-          </p>
-          <button onclick="setStep(7)" class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition">Chalo agge →</button>
+          <p class="text-gray-700 text-base mb-6">"Rabb kare tuhada eh saal khushiyan, achhi health te kamyabi naal bharya rahe. Hamesha eda hi smile karde raho! ✨❤️"</p>
+          <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold active:scale-95 transition" onClick="setStep(6)">Chalo agge →</button>
         `;
-      } 
-      // STEP 7: MEMORIES
-      else if (step === 7) {
+      } else if (step === 6) {
         card.innerHTML = `
           <h2 class="text-xl font-bold text-pink-600">Some Sweet Moments 💗</h2>
           <p class="text-xs text-gray-400 mb-4">Swipe the cards</p>
-          <div class="bg-pink-50 p-3 rounded-2xl shadow-inner border border-pink-100">
-            <img src="${photos[activePhotoIdx].src}" alt="Memory" class="w-full h-52 object-cover rounded-xl mb-3" onerror="this.src='https://via.placeholder.com/300x200?text=Photo+Not+Found'"/>
-            <input type="text" value="${photos[activePhotoIdx].caption}" onchange="updateCaption(this.value)" class="w-full text-center bg-transparent border-b border-pink-300 text-sm font-medium text-gray-700 focus:outline-none"/>
-          </div>
+          <img src="${photos[activePhotoIdx].src}" alt="Memory" class="w-full h-52 object-cover rounded-xl mb-3">
+          <input type="text" value="${photos[activePhotoIdx].caption}" onchange="photos[${activePhotoIdx}].caption = this.value" class="w-full text-center border-b border-pink-300 focus:outline-none mb-4">
           <div class="flex items-center justify-center gap-4 my-4">
-            <button ${activePhotoIdx === 0 ? 'disabled' : ''} onclick="prevPhoto()" class="bg-pink-500 text-white px-3 py-1 rounded-lg text-sm disabled:opacity-30">◀</button>
+            <button class="bg-pink-500 text-white px-3 py-1 rounded-lg text-sm disabled:opacity-30" disabled="${activePhotoIdx === 0}" onClick="setActivePhotoIdx(${activePhotoIdx - 1})">◀</button>
             <span class="text-xs font-semibold text-gray-500">${activePhotoIdx + 1} / ${photos.length}</span>
-            <button ${activePhotoIdx === photos.length - 1 ? 'disabled' : ''} onclick="nextPhoto()" class="bg-pink-500 text-white px-3 py-1 rounded-lg text-sm disabled:opacity-30">▶</button>
+            <button class="bg-pink-500 text-white px-3 py-1 rounded-lg text-sm disabled:opacity-30" disabled="${activePhotoIdx === photos.length - 1}" onClick="setActivePhotoIdx(${activePhotoIdx + 1})">▶</button>
           </div>
-          <label class="text-xs font-bold text-pink-600 cursor-pointer block mb-4">
-            + Add Memory Photos 📸
-            <input type="file" multiple accept="image/*" onchange="handleAddPhotos(event)" class="hidden" />
-          </label>
-          <button onclick="setStep(8)" class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition w-full">Agge Chalo →</button>
+          <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold active:scale-95 transition w-full" onClick="setStep(7)">Agge Chalo →</button>
         `;
-      } 
-      // STEP 8: RELATIONSHIP QUESTIONS
-      else if (step === 8) {
-        let q = relQuestions[relIndex];
-        let opts = q.options.map((opt, i) => `
-          <button onclick="handleRelAnswer('${opt.react}')" class="w-full border border-pink-400 text-pink-600 rounded-xl py-2 px-3 text-sm font-medium active:bg-pink-50 transition mb-2">
-            ${opt.text}
-          </button>
-        `).join('');
+      } else if (step === 7) {
         card.innerHTML = `
-          <span class="text-xs font-bold text-pink-400 uppercase tracking-widest">Question ${relIndex + 1} / 5</span>
-          <p class="text-base font-semibold text-gray-800 my-4">${q.q}</p>
-          <div class="space-y-2">${opts}</div>
-          <p id="relReact" class="text-sm font-bold text-pink-600 mt-4 ${relReaction ? 'animate-bounce' : ''}">${relReaction}</p>
+          <h3>Question {relIndex + 1} / 5</h3>
+          <p class="my-4">${relQuestions[relIndex].q}</p>
+          ${relQuestions[relIndex].options.map((opt, i) => `<button class="w-full border border-pink-400 text-pink-600 rounded-xl py-2 mb-2 active:bg-pink-50" onClick="handleRelAnswer(${i})">${opt.text}</button>`).join('')}
         `;
-      } 
-      // STEP 9: COMMITMENTS
-      else if (step === 9) {
-        let q = comQuestions[comIndex];
-        let opts = q.options.map((opt) => `
-          <button onclick="handleComAnswer('${opt}')" class="w-full border border-pink-400 text-pink-600 rounded-xl py-2 px-3 text-sm font-medium active:bg-pink-50 transition mb-2">
-            ${opt}
-          </button>
-        `).join('');
+      } else if (step === 8) {
         card.innerHTML = `
-          <span class="text-xs font-bold text-pink-400 uppercase tracking-widest">Commitment ${comIndex + 1} / 5</span>
-          <p class="text-base font-semibold text-gray-800 my-4">${q.q}</p>
-          <div class="space-y-2">${opts}</div>
+          <h3>Commitment {comIndex + 1} / 5</h3>
+          <p class="my-4">${comQuestions[comIndex].q}</p>
+          ${comQuestions[comIndex].options.map((opt, i) => `<button class="w-full border border-pink-400 text-pink-600 rounded-xl py-2 mb-2 active:bg-pink-50" onClick="handleComAnswer('${opt}')">${opt}</button>`).join('')}
         `;
-      } 
-      // STEP 10: AGREEMENT
-      else if (step === 10) {
-        let ansList = comAnswers.map(item => `
-          <div>
-            <p class="font-bold text-gray-700">Q: ${item.q}</p>
-            <p class="text-pink-600">Ans: ${item.a}</p>
+      } else if (step === 9) {
+        card.innerHTML = `
+          <h2>📝 Commitment Agreement</h2>
+          <div class="text-left bg-pink-50 p-3 rounded-xl text-xs space-y-2 mb-4">
+            ${comAnswers.map((item, idx) => `<p><b>Q: {item.q}</b><br>Ans: {item.a}</p>`).join('')}
           </div>
-        `).join('');
-        card.innerHTML = `
-          <h2 class="text-xl font-bold text-pink-600 mb-3">📝 Commitment Agreement</h2>
-          <div class="text-left bg-pink-50 p-3 rounded-xl text-xs space-y-2 max-h-48 overflow-y-auto mb-4 border border-pink-100">${ansList}</div>
-          <p class="text-xs text-gray-500 mb-2">Sign below (Riya):</p>
-          <canvas id="sigCanvas" width="280" height="100" class="border border-dashed border-pink-400 rounded-xl bg-white mx-auto"></canvas>
-          <button id="sigBtn" onclick="setStep(11)" class="${hasSigned ? '' : 'hidden'} bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition w-full mt-4">Accept & Proceed 🎂</button>
+          <p class="mb-2">Sign below (Riya):</p>
+          <canvas id="sigCanvas" width="280" height="100" class="border border-dashed rounded-xl mb-4 mx-auto" onMouseDown="startDrawing(event)" onMouseMove="draw(event)" onMouseUp="stopDrawing()" onTouchStart="startDrawing(event)" onTouchMove="draw(event)" onTouchEnd="stopDrawing()"></canvas>
+          ${hasSigned ? `<button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold active:scale-95 transition w-full" onClick="setStep(10)">Accept & Share 🎉</button>` : ''}
         `;
-        setTimeout(initCanvas, 50);
-      } 
-      // STEP 11: CAKE WITH RAINFALL EFFECT
-      else if (step === 11) {
+        canvasRef.current = document.getElementById('sigCanvas');
+      } else if (step === 10) {
         card.innerHTML = `
-          <h2 class="text-xl font-bold text-pink-600 mb-2">Tap the Cake! 🎂</h2>
-          <div onclick="handleCakeClick()" class="text-7xl my-6 cursor-pointer active:scale-125 transition transform select-none">🎂✨</div>
-          <div id="cakeMsg" class="${cakeClicks > 0 ? '' : 'hidden'} space-y-1">
-            <p class="text-pink-600 font-bold text-base">Happy Birthday Riya 🎂❤️</p>
-            <p class="text-xs text-gray-600">Love You ❤️ | Apna khayal rakhya kar 🫶</p>
-          </div>
-          <button id="finalBtn" onclick="setStep(12)" class="${cakeClicks >= 1 ? '' : 'hidden'} bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition w-full mt-6">Final Surprise 🎁❤️</button>
+          <h2>Tap the Cake! 🎂</h2>
+          <div class="text-7xl my-6 cursor-pointer select-none" onClick="handleCakeClick()">🎂✨</div>
+          ${cakeClicks > 0 ? `<p>Happy Birthday Riya 🎂❤️<br>Love You ❤️ | Apna khayal rakhya kar 🫶</p>` : ''}
+          ${cakeClicks >= 1 ? `<button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold active:scale-95 transition w-full mt-4" onClick="setStep(11)">Final Surprise 🎁❤️</button>` : ''}
         `;
-      } 
-      // STEP 12: FINAL SURPRISE WITH EXACT CUSTOM WISH
-      else if (step === 12) {
+      } else if (step === 11) {
         card.innerHTML = `
-          <img src="final.jpg" alt="Final Surprise" class="w-full rounded-2xl mb-4 object-cover" onerror="this.src='https://via.placeholder.com/300x200?text=Final+Photo'"/>
-          
-          <div class="text-left bg-pink-50 p-4 rounded-2xl border border-pink-200 text-xs text-gray-700 leading-relaxed space-y-3 max-h-80 overflow-y-auto">
-            <p class="font-bold text-pink-600 text-sm text-center">Happy Birthday Riya 🎂❤️</p>
-            
-            <p>Rabb kare tu hamesha eddan hi hassdi reh, khush reh te life nu apne tareeke naal enjoy kardi reh. 🫶</p>
-            
-            <p>Tere saare dreams taan menu honestly ni pta 🤭, par jo vi ne... saare hi poore hon. Tu life ch jo vi achieve karna chaundi aa, Rabb kare oh sab tenu mile, te har oh cheez mile jidi tu deserve kardi aa. ❤️</p>
-            
-            <p>Te haan... ohna saare dreams ch menu chhad ke hor sab kuchh mil jaave, eh taan bilkul ni hona chahida 😂🤭❤️<br/>
-            Thodi jehi jagah mere layi vi rakh lavi, baaki main adjust kar lunga. 😌</p>
-            
-            <p>Sadi gall hamesha hundi vi ni, kade-kade hi hundi aa 🤭, par jinni vi hundi aa, oh apne aap ch special aa.<br/>
-            Bas eddan hi kade-kade meri bak-bak sun lya kar. 😂</p>
-            
-            <p>Bas ik gall hamesha yaad rakhi—<br/>
-            khush rehna, apni smile nu kade na khona te jo vi dil ch aa, ohde piche zaroor jaana. ✨</p>
-            
-            <p>Te haan Riya... birthday tera aa, wishaan vi teriyan ne, par thoda credit menu vi de di... inni sohni wish likhan layi. 😂🤭❤️</p>
-            
-            <p class="font-bold text-pink-600 text-center">Happy Birthday once again Riya 🎂❤️</p>
-            
-            <p class="text-center">Rabb kare aun wala har din tere layi hor vi sohnaa hove. ✨</p>
-          </div>
+          <img src="images/final.jpg" alt="Final Surprise" class="w-full rounded-2xl mb-4 object-cover">
+          <p class="mb-6">Hamesha khush raho! Happy Birthday again Riya! ✨💗</p>
+          <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold active:scale-95 transition w-full" onClick="setStep(12)">Close Option</button>
+        `;
+      } else if (step === 12) {
+        card.innerHTML = `
+          <h2>Finally Closed 🎉</h2>
+          <p>Tuhade saare answers share ho gaye han te agreement signed hai! Have a blast! ❤️</p>
         `;
       }
     }
 
     function setStep(s) { step = s; render(); }
-    function prevPhoto() { if (activePhotoIdx > 0) { activePhotoIdx--; render(); } }
-    function nextPhoto() { if (activePhotoIdx < photos.length - 1) { activePhotoIdx++; render(); } }
-    function updateCaption(val) { photos[activePhotoIdx].caption = val; }
+    function setActivePhotoIdx(i) { activePhotoIdx = i; render(); }
 
-    function handleAddPhotos(e) {
-      const files = Array.from(e.target.files);
-      files.forEach(f => {
-        photos.push({ src: URL.createObjectURL(f), caption: 'Sweet Memory 💗' });
-      });
-      render();
-    }
-
-    function attachFP() {
-      const box = document.getElementById('fpBox');
-      const line = document.getElementById('scanLine');
-      if (!box) return;
-
-      const start = () => {
-        line.classList.remove('hidden');
-        holdInterval = setInterval(() => {
-          holdProgress += 5;
-          if (holdProgress >= 100) {
-            clearInterval(holdInterval);
-            setStep(5);
-          } else {
-            document.getElementById('fpBar').style.width = holdProgress + '%';
-            document.getElementById('fpText').innerText = holdProgress + '%';
-          }
-        }, 100);
-      };
-
-      const end = () => {
-        line.classList.add('hidden');
-        if (holdProgress < 100) {
+    function startHold() {
+      holdInterval = setInterval(() => {
+        holdProgress += 10; // Progress every second for approx 4-5 seconds total
+        if (holdProgress >= 100) {
           clearInterval(holdInterval);
-          holdProgress = 0;
-          if (document.getElementById('fpBar')) {
-            document.getElementById('fpBar').style.width = '0%';
-            document.getElementById('fpText').innerText = '0%';
-          }
+          setStep(4);
+        } else {
+          render();
         }
-      };
-
-      box.onmousedown = start; box.onmouseup = end;
-      box.ontouchstart = start; box.ontouchend = end;
+      }, 1000);
     }
 
-    function handleRelAnswer(react) {
-      relReaction = react;
-      render();
-      setTimeout(() => {
-        relReaction = '';
-        if (relIndex < relQuestions.length - 1) { relIndex++; } else { step = 9; }
+    function endHold() {
+      if (holdProgress < 100) {
+        clearInterval(holdInterval);
+        holdProgress = 0;
         render();
-      }, 1500);
+      }
+    }
+
+    function handleRelAnswer(i) {
+      relAnswers.push({ q: relQuestions[relIndex].q, a: relQuestions[relIndex].options[i].text });
+      if (relIndex < relQuestions.length - 1) { relIndex++; render(); } else { setStep(8); }
     }
 
     function handleComAnswer(ans) {
       comAnswers.push({ q: comQuestions[comIndex].q, a: ans });
-      if (comIndex < comQuestions.length - 1) { comIndex++; } else { step = 10; }
-      render();
+      if (comIndex < comQuestions.length - 1) { comIndex++; render(); } else { setStep(9); }
     }
 
-    function initCanvas() {
-      const canvas = document.getElementById('sigCanvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      const getPos = e => {
-        const rect = canvas.getBoundingClientRect();
-        return {
-          x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left,
-          y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top
-        };
-      };
-      const startDraw = e => {
-        isDrawing = true; hasSigned = true;
-        const pos = getPos(e);
-        ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
-        document.getElementById('sigBtn').classList.remove('hidden');
-      };
-      const draw = e => {
-        if (!isDrawing) return;
-        const pos = getPos(e);
-        ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 3;
-        ctx.lineTo(pos.x, pos.y); ctx.stroke();
-      };
-      const stopDraw = () => isDrawing = false;
+    function startDrawing(e) {
+      if (!canvasRef.current) return;
+      isDrawing = true; hasSigned = true;
+      const ctx = canvasRef.current.getContext('2d');
+      const rect = canvasRef.current.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      ctx.beginPath(); ctx.moveTo(x, y);
+    }
 
-      canvas.onmousedown = startDraw; canvas.onmousemove = draw; canvas.onmouseup = stopDraw;
-      canvas.ontouchstart = startDraw; canvas.ontouchmove = draw; canvas.ontouchend = stopDraw;
+    function draw(e) {
+      if (!isDrawing || !canvasRef.current) return;
+      const ctx = canvasRef.current.getContext('2d');
+      const rect = canvasRef.current.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 3; ctx.lineTo(x, y); ctx.stroke();
+    }
+
+    function stopDrawing() { isDrawing = false; render(); } // Re-render to show "Share" button
+
+    // Step 3: Enable answer sharing by filling in your EmailJS IDs and following their setup instructions
+    function shareAnswersAndSignature() {
+      const allAnswers = [...relAnswers, ...comAnswers];
+      const answerText = allAnswers.map(a => `Q: {a.q}\nAns: {a.a}`).join('\n\n');
+      
+      const emailParams = {
+        recipient_email: "YOUR_EMAIL_ADDRESS", // Enter your email here
+        content: answerText,
+        signature_image: canvasRef.current.toDataURL() // Sends signature as base64 image
+      };
+
+      // emailjs.send("YOUR_EMAILJS_SERVICE_ID", "YOUR_EMAILJS_TEMPLATE_ID", emailParams)
+      //   .then(() => alert("Answers and signature shared successfully!"))
+      //   .catch(err => alert("Error sharing: " + err));
     }
 
     function handleCakeClick() {
-      cakeClicks++;
-      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-
-      // Cake Rainfall Text/Emojis Effect
-      const items = ['🎂', '❤️', '🎈', 'Happy Birthday Riya! 💖', 'Love You ❤️', 'Apna khayal rakhya kar 🫶', '✨'];
-      for (let i = 0; i < 8; i++) {
-        const el = document.createElement('div');
-        el.className = 'falling-item text-xs font-bold text-pink-600 bg-white/80 px-2 py-1 rounded-full shadow-md';
-        el.innerText = items[Math.floor(Math.random() * items.length)];
-        el.style.left = Math.random() * 80 + 10 + 'vw';
-        el.style.animationDuration = (Math.random() * 2 + 2) + 's';
-        document.body.appendChild(el);
-        setTimeout(() => el.remove(), 3000);
+      cakeClicks++; confetti({ particleCount: 70 });
+      for (let i = 0; i < 5; i++) {
+        const balloon = document.createElement('div');
+        balloon.className = 'floating-balloon'; balloon.innerText = i % 2 === 0 ? '🎈' : '❤️';
+        balloon.style.left = (20 + i * 15) + 'vw'; balloon.style.animationDelay = (i * 0.5) + 's';
+        document.body.appendChild(balloon); setTimeout(() => balloon.remove(), 10000);
       }
-
       render();
-    }
-
-    function updateTimer() {
-      const target = new Date('2026-09-16T00:00:00+05:30').getTime();
-      const interval = setInterval(() => {
-        const now = new Date().getTime();
-        const diff = target - now;
-        const disp = document.getElementById('timerDisplay');
-        if (!disp) { clearInterval(interval); return; }
-        if (diff <= 0) {
-          disp.innerHTML = `<h1 class="col-span-4 text-xl font-bold text-pink-600 animate-bounce">It’s Riya’s Birthday! 🎂❤️</h1>`;
-          clearInterval(interval);
-        } else {
-          const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-          const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const s = Math.floor((diff % (1000 * 60)) / 1000);
-          disp.innerHTML = `
-            <div class="bg-pink-50 p-2 rounded-xl"><span class="text-lg text-pink-600">${d}</span><br/><span class="text-[10px] text-gray-400">Days</span></div>
-            <div class="bg-pink-50 p-2 rounded-xl"><span class="text-lg text-pink-600">${h}</span><br/><span class="text-[10px] text-gray-400">Hours</span></div>
-            <div class="bg-pink-50 p-2 rounded-xl"><span class="text-lg text-pink-600">${m}</span><br/><span class="text-[10px] text-gray-400">Mins</span></div>
-            <div class="bg-pink-50 p-2 rounded-xl"><span class="text-lg text-pink-600">${s}</span><br/><span class="text-[10px] text-gray-400">Secs</span></div>
-          `;
-        }
-      }, 1000);
     }
 
     render();
