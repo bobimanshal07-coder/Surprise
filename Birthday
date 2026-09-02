@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Birthday Surprise for Riya 🎉</title>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+      font-family: 'Poppins', sans-serif;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+  <div id="root" class="w-full max-w-md"></div>
+
+  <script type="text/babel">
+    const { useState, useRef, useEffect } = React;
+
+    function BirthdaySurprise() {
+      const [step, setStep] = useState(1);
+
+      // 3. Fingerprint Hold
+      const [holdProgress, setHoldProgress] = useState(0);
+      const holdInterval = useRef(null);
+
+      const startHold = () => {
+        holdInterval.current = setInterval(() => {
+          setHoldProgress((prev) => {
+            if (prev >= 100) {
+              clearInterval(holdInterval.current);
+              setStep(4);
+              return 100;
+            }
+            return prev + 5;
+          });
+        }, 100);
+      };
+
+      const endHold = () => {
+        if (holdProgress < 100) {
+          clearInterval(holdInterval.current);
+          setHoldProgress(0);
+        }
+      };
+
+      // 6. Memory Photos
+      const [photos, setPhotos] = useState([
+        { src: 'images/photo1.jpg', caption: 'Sweet Memory 💗' },
+        { src: 'images/photo2.jpg', caption: 'Sweet Memory 💗' },
+        { src: 'images/photo3.jpg', caption: 'Sweet Memory 💗' },
+        { src: 'images/photo4.jpg', caption: 'Sweet Memory 💗' },
+        { src: 'images/photo5.jpg', caption: 'Sweet Memory 💗' },
+        { src: 'images/photo6.jpg', caption: 'Sweet Memory 💗' },
+      ]);
+      const [activePhotoIdx, setActivePhotoIdx] = useState(0);
+
+      const handleAddPhotos = (e) => {
+        const files = Array.from(e.target.files);
+        const newImgs = files.map((file) => ({
+          src: URL.createObjectURL(file),
+          caption: 'Sweet Memory 💗',
+        }));
+        setPhotos((prev) => [...prev, ...newImgs]);
+      };
+
+      const updateCaption = (index, newCaption) => {
+        const updated = [...photos];
+        updated[index].caption = newCaption;
+        setPhotos(updated);
+      };
+
+      // 7. Relationship Questions
+      const relQuestions = [
+        {
+          q: '😌 Main jiddan da haan, tenu oh genuine lagda ya thoda zyada hi pagal?',
+          options: [
+            { text: 'Genuine ❤️', react: 'Aww! Tusi vi bhot pyare ho! 🥺❤️' },
+            { text: 'Cute pagal 😂', react: 'Haha! Pagal taan haan par sirf tere layi! 🤪' },
+            { text: 'Dono da mixture 😌', react: 'Best combination lagda fer taan! ✨' },
+          ],
+        },
+        {
+          q: '🫢 Meri kehdi gall ya aadat tenu kade-kade awkward ya annoying lagdi aa?',
+          options: [
+            { text: 'Baar-baar puchhna "ki hoya?" 😭', react: 'Care karda haan islayi puchhda haan! 🥺' },
+            { text: 'Thodi zyada care karna 😂', react: 'Care thodi zyada hi honi chahidi aa! 🥰' },
+            { text: 'Meri overthinking 😌', react: 'Aage ton ghata devanga overthinking! 🧠' },
+            { text: 'Kujh hor… 👀', react: 'Mainu dssna zaroor fer baad vich! 😂' },
+          ],
+        },
+        {
+          q: '🥹 Je by chance main tere naal gall karni band kar dawaan, ya sade vich koi misunderstanding ho jaave… tu aap mere naal gall karan di try karegi?',
+          options: [
+            { text: 'Haan ji, zaroor ❤️', react: 'Eh sun ke dil nu sukoon mileya! ❤️' },
+            { text: 'Pehla gussa karungi, fer aap gall karangi 😂', react: 'Thoda gussa vi zaroori aa! 😜' },
+            { text: 'Situation te depend karega 😌', react: 'Fair enough! Par gall kar leya karo! 🥹' },
+            { text: 'Apna answer likhungi ✍️', react: 'Aapda answer likh ke batao fer! 📝' },
+          ],
+        },
+        {
+          q: '🫶 Meri care ya meri gallan vichon kehdi cheez tenu sab ton zyada feel hundi aa ki "haan, eh banda genuinely care karda"?',
+          options: [
+            { text: 'Baar-baar tera haal puchhna ❤️', react: 'Tuhadi health/mood sab ton pehla! 🫶' },
+            { text: 'Tere chhote-chhote details yaad rakhna 🥹', react: 'Har choti gall yaad rehndi aa mainu! ✨' },
+            { text: 'Tere dreams te future nu seriously lena 💗', react: 'Tuhade supne mere supne han! 🌈' },
+            { text: 'Apna answer likhungi ✍️', react: 'Kujh khas hi hona fer taan! ❤️' },
+          ],
+        },
+        {
+          q: '💗 Last question: main jiddan da haan, ohnu change karna chaundi aa ya eda hi theek aa?',
+          options: [
+            { text: 'Eda hi ❤️', react: 'Bestest! Main vi eda hi rahunga! ❤️' },
+            { text: 'Thoda jeha change 😂', react: 'Chalo thoda adjust kar lavange! 😉' },
+            { text: 'Bilkul change nahi 🥹', react: 'Thank you for accepting me as I am! 💖' },
+            { text: 'Mainu sochan de 😌', react: 'Time lao, soch ke dasso! ⏱️' },
+          ],
+        },
+      ];
+
+      const [relIndex, setRelIndex] = useState(0);
+      const [relReaction, setRelReaction] = useState('');
+
+      const handleRelAnswer = (reactText) => {
+        setRelReaction(reactText);
+        setTimeout(() => {
+          setRelReaction('');
+          if (relIndex < relQuestions.length - 1) {
+            setRelIndex(relIndex + 1);
+          } else {
+            setStep(8);
+          }
+        }, 1500);
+      };
+
+      // 8. Commitments
+      const comQuestions = [
+        {
+          q: '😊 Apni sohni smile hamesha maintain rakhegi?',
+          options: ['Haan ji, hamesha ❤️', 'Koshish poori rahugi 🥰', 'Reason tusi dinde rehna 😌'],
+        },
+        {
+          q: '🫶 Apni health da changi tarah dhyaan rakhegi?',
+          options: ['Haan ji 💗', 'Hun ton pakka 😌', 'Tusi reminder dinde rehna 😂'],
+        },
+        {
+          q: '💗 Tu kade vi apne aap nu kise ton ghatt nahi samjhegi?',
+          options: ['Haan ji, kade vi nahi ❤️', 'Mainu pata aa meri value 😌', 'Tusi yaad karwa dinde rehna 😂', 'Eh taan pakka aa 🥰'],
+        },
+        {
+          q: '😂 Birthday party kadon deni aa?',
+          options: ['Jaldi hi 🎂❤️', 'Milange odo party pakki 😌', 'Google Pay available nahi hai 😂', 'Tusi aayo, fer party dungi 😌❤️', 'Apna answer likhungi ✍️'],
+        },
+        {
+          q: '🌱 Apne future layi mehnat karna kabhi give up nahi karegi?',
+          options: ['Never ❤️', 'Thak sakdi aa, rukangi nahi 💪', 'Tusi motivation dinde rehna 😭😂', 'Apna answer likhungi ✍️'],
+        },
+      ];
+
+      const [comIndex, setComIndex] = useState(0);
+      const [comAnswers, setComAnswers] = useState([]);
+
+      const handleComAnswer = (ans) => {
+        const updated = [...comAnswers, { q: comQuestions[comIndex].q, a: ans }];
+        setComAnswers(updated);
+        if (comIndex < comQuestions.length - 1) {
+          setComIndex(comIndex + 1);
+        } else {
+          setStep(9);
+        }
+      };
+
+      // 9. Signature Pad
+      const canvasRef = useRef(null);
+      const [isDrawing, setIsDrawing] = useState(false);
+      const [hasSigned, setHasSigned] = useState(false);
+
+      const startDrawing = (e) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        setIsDrawing(true);
+        setHasSigned(true);
+      };
+
+      const draw = (e) => {
+        if (!isDrawing) return;
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+        ctx.strokeStyle = '#ff3366';
+        ctx.lineWidth = 3;
+        ctx.lineTo(x, y);
+        ctx.stroke();
+      };
+
+      const stopDrawing = () => setIsDrawing(false);
+
+      // 10. Cake Click
+      const [cakeClicks, setCakeClicks] = useState(0);
+      const handleCakeClick = () => {
+        setCakeClicks((prev) => prev + 1);
+        confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+      };
+
+      // 12. Countdown
+      const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      const [isBirthday, setIsBirthday] = useState(false);
+
+      useEffect(() => {
+        const targetDate = new Date('2026-09-16T00:00:00+05:30').getTime();
+        const timer = setInterval(() => {
+          const now = new Date().getTime();
+          const difference = targetDate - now;
+
+          if (difference <= 0) {
+            setIsBirthday(true);
+            clearInterval(timer);
+          } else {
+            setTimeLeft({
+              days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+              hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+              minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+              seconds: Math.floor((difference % (1000 * 60)) / 1000),
+            });
+          }
+        }, 1000);
+
+        return () => clearInterval(timer);
+      }, []);
+
+      return (
+        <div class="bg-white p-6 rounded-3xl shadow-xl text-center border border-pink-100">
+          {step === 1 && (
+            <div>
+              <div class="text-6xl mb-3">🐒✉️</div>
+              <h2 class="text-2xl font-bold text-pink-600 mb-2">A Special Wish For Riya ✨</h2>
+              <p class="text-gray-600 mb-6">Tuhade layi ek chhota jeha pyara surprise!</p>
+              <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition" onClick={() => setStep(2)}>Open Letter 💌</button>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div>
+              <h2 class="text-2xl font-bold text-pink-600 mb-6">Are You Ready For The Surprise? 💗</h2>
+              <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition" onClick={() => setStep(3)}>Yes, I am Ready! ✨</button>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div>
+              <h2 class="text-xl font-bold text-gray-800 mb-2">🔐 Biometric Verification</h2>
+              <p class="text-sm text-gray-500 mb-4">Press & Hold the fingerprint icon for 2 seconds!</p>
+              <div
+                onMouseDown={startHold}
+                onMouseUp={endHold}
+                onTouchStart={startHold}
+                onTouchEnd={endHold}
+                class="text-6xl my-6 cursor-pointer select-none active:scale-110 transition transform"
+              >
+                ☝️
+              </div>
+              <div class="w-full bg-gray-200 h-3 rounded-full overflow-hidden mb-2">
+                <div class="bg-pink-500 h-full transition-all duration-100" style={{ width: `${holdProgress}%` }}></div>
+              </div>
+              <p class="text-sm font-bold text-pink-500">{holdProgress}%</p>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div>
+              <h1 class="text-3xl font-extrabold text-pink-600 mb-6">🎉 Happy Birthday Riya ❤️ 🎂</h1>
+              <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition" onClick={() => setStep(5)}>Next ✨</button>
+            </div>
+          )}
+
+          {step === 5 && (
+            <div>
+              <div class="text-5xl mb-4">💌</div>
+              <p class="text-gray-700 leading-relaxed text-base mb-6">
+                "Rabb kare tuhada eh saal khushiyan, achhi health te kamyabi naal bharya rahe. Hamesha eda hi smile karde raho! ✨❤️"
+              </p>
+              <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition" onClick={() => setStep(6)}>Chalo agge →</button>
+            </div>
+          )}
+
+          {step === 6 && (
+            <div>
+              <h2 class="text-xl font-bold text-pink-600">Some Sweet Moments 💗</h2>
+              <p class="text-xs text-gray-400 mb-4">Swipe or click next</p>
+
+              <div class="bg-pink-50 p-3 rounded-2xl shadow-inner border border-pink-100">
+                <img src={photos[activePhotoIdx].src} alt="Memory" class="w-full h-52 object-cover rounded-xl mb-3" />
+                <input
+                  type="text"
+                  value={photos[activePhotoIdx].caption}
+                  onChange={(e) => updateCaption(activePhotoIdx, e.target.value)}
+                  class="w-full text-center bg-transparent border-b border-pink-300 text-sm font-medium text-gray-700 focus:outline-none"
+                />
+              </div>
+
+              <div class="flex items-center justify-center gap-4 my-4">
+                <button disabled={activePhotoIdx === 0} onClick={() => setActivePhotoIdx((prev) => prev - 1)} class="bg-pink-500 text-white px-3 py-1 rounded-lg text-sm disabled:opacity-30">◀</button>
+                <span class="text-xs font-semibold text-gray-500">{activePhotoIdx + 1} / {photos.length}</span>
+                <button disabled={activePhotoIdx === photos.length - 1} onClick={() => setActivePhotoIdx((prev) => prev + 1)} class="bg-pink-500 text-white px-3 py-1 rounded-lg text-sm disabled:opacity-30">▶</button>
+              </div>
+
+              <label class="text-xs font-bold text-pink-600 cursor-pointer block mb-4">
+                + Add Memory Photos 📸
+                <input type="file" multiple accept="image/*" onChange={handleAddPhotos} class="hidden" />
+              </label>
+
+              <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition w-full" onClick={() => setStep(7)}>Agge Chalo →</button>
+            </div>
+          )}
+
+          {step === 7 && (
+            <div>
+              <span class="text-xs font-bold text-pink-400 uppercase tracking-widest">Question {relIndex + 1} / 5</span>
+              <p class="text-base font-semibold text-gray-800 my-4">{relQuestions[relIndex].q}</p>
+              <div class="space-y-2">
+                {relQuestions[relIndex].options.map((opt, i) => (
+                  <button key={i} class="w-full border border-pink-400 text-pink-600 rounded-xl py-2 px-3 text-sm font-medium active:bg-pink-50 transition" onClick={() => handleRelAnswer(opt.react)}>
+                    {opt.text}
+                  </button>
+                ))}
+              </div>
+              {relReaction && <p class="text-sm font-bold text-pink-600 mt-4 animate-bounce">{relReaction}</p>}
+            </div>
+          )}
+
+          {step === 8 && (
+            <div>
+              <span class="text-xs font-bold text-pink-400 uppercase tracking-widest">Commitment {comIndex + 1} / 5</span>
+              <p class="text-base font-semibold text-gray-800 my-4">{comQuestions[comIndex].q}</p>
+              <div class="space-y-2">
+                {comQuestions[comIndex].options.map((opt, i) => (
+                  <button key={i} class="w-full border border-pink-400 text-pink-600 rounded-xl py-2 px-3 text-sm font-medium active:bg-pink-50 transition" onClick={() => handleComAnswer(opt)}>
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 9 && (
+            <div>
+              <h2 class="text-xl font-bold text-pink-600 mb-3">📝 Commitment Agreement</h2>
+              <div class="text-left bg-pink-50 p-3 rounded-xl text-xs space-y-2 max-h-48 overflow-y-auto mb-4 border border-pink-100">
+                {comAnswers.map((item, idx) => (
+                  <div key={idx}>
+                    <p class="font-bold text-gray-700">Q: {item.q}</p>
+                    <p class="text-pink-600">Ans: {item.a}</p>
+                  </div>
+                ))}
+              </div>
+              <p class="text-xs text-gray-500 mb-2">Sign below (Riya):</p>
+              <canvas
+                ref={canvasRef}
+                width={280}
+                height={100}
+                class="border border-dashed border-pink-400 rounded-xl bg-white mx-auto"
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
+              />
+              {hasSigned && (
+                <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition w-full mt-4" onClick={() => setStep(10)}>Accept & Proceed 🎂</button>
+              )}
+            </div>
+          )}
+
+          {step === 10 && (
+            <div>
+              <h2 class="text-xl font-bold text-pink-600 mb-2">Tap the Cake! 🎂</h2>
+              <div onClick={handleCakeClick} class="text-7xl my-6 cursor-pointer active:scale-125 transition transform select-none">
+                🎂✨
+              </div>
+              {cakeClicks > 0 && (
+                <div class="space-y-1">
+                  <p class="text-pink-600 font-bold text-base">Happy Birthday Riya 🎂❤️</p>
+                  <p class="text-xs text-gray-600">Love You ❤️ | Apna khayal rakhya kar 🫶</p>
+                </div>
+              )}
+              {cakeClicks >= 1 && (
+                <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition w-full mt-6" onClick={() => setStep(11)}>Final Surprise 🎁❤️</button>
+              )}
+            </div>
+          )}
+
+          {step === 11 && (
+            <div>
+              <img src="images/final.jpg" alt="Final Surprise" class="w-full rounded-2xl mb-4 object-cover" />
+              <h2 class="text-xl font-bold text-pink-600 mb-2">You are Special ❤️</h2>
+              <p class="text-sm text-gray-600 mb-6 leading-relaxed">
+                "Hamesha khush raho te eda hi hasso! Happy Birthday once again Riya! ✨💗"
+              </p>
+              <button class="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold shadow-md active:scale-95 transition w-full" onClick={() => setStep(12)}>View Countdown ⏳</button>
+            </div>
+          )}
+
+          {step === 12 && (
+            <div>
+              <h2 class="text-xl font-bold text-pink-600 mb-4">Riya da Birthday Countdown 🎂❤️</h2>
+              {isBirthday ? (
+                <h1 class="text-2xl font-bold text-pink-600 animate-bounce">It’s Riya’s Birthday! 🎂❤️</h1>
+              ) : (
+                <div class="grid grid-cols-4 gap-2 text-center font-bold text-gray-700">
+                  <div class="bg-pink-50 p-2 rounded-xl"><span class="text-xl text-pink-600">{timeLeft.days}</span><br /><span class="text-xs text-gray-400">Days</span></div>
+                  <div class="bg-pink-50 p-2 rounded-xl"><span class="text-xl text-pink-600">{timeLeft.hours}</span><br /><span class="text-xs text-gray-400">Hours</span></div>
+                  <div class="bg-pink-50 p-2 rounded-xl"><span class="text-xl text-pink-600">{timeLeft.minutes}</span><br /><span class="text-xs text-gray-400">Mins</span></div>
+                  <div class="bg-pink-50 p-2 rounded-xl"><span class="text-xl text-pink-600">{timeLeft.seconds}</span><br /><span class="text-xs text-gray-400">Secs</span></div>
+                </div>
+              )}
+ 
